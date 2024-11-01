@@ -55,6 +55,22 @@ int help(char **args)
 // ======================= requirement 2.1 =======================
 int cd(char **args)
 {
+        if (args[1] == NULL) {
+        // If no argument is provided, go to the HOME directory
+            char *home = getenv("HOME");
+            if (home == NULL) {
+                fprintf(stderr, "cd: HOME environment variable not set\n");
+                return 1;
+            }
+            if (chdir(home) != 0) {
+                perror("cd");
+            }
+        } else {
+            // Change to the specified directory
+            if (chdir(args[1]) != 0) {
+                perror("cd");
+            }
+        }
 	return 1;
 }
 // ===============================================================
