@@ -50,8 +50,8 @@ void *thread1(void *arg){
     for(int i=0; i<matrix_row_x; i++){
         for(int j=0; j<matrix_col_y; j++){
             for(int k=0; k<matrix_row_y/2; k++){
-
-            }      
+                z[i][j] += x[i][k] * y[k][j];
+            }
         }
     }
     /****************/
@@ -64,8 +64,8 @@ void *thread2(void *arg) {
     for(int i=0; i<matrix_row_x; i++){
         for(int j=0; j<matrix_col_y; j++){
             for(int k=matrix_row_y/2; k<matrix_row_y; k++){
-
-            }     
+                z[i][j] += x[i][k] * y[k][j];
+            }
         }
     } 
     /****************/

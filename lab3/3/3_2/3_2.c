@@ -73,7 +73,18 @@ void *thread1(void *arg){
 
     /*YOUR CODE HERE*/
     /* Hint: Write data into proc file.*/
+    int proc_file = open("/proc/Mythread_info", O_WRONLY);
+    if (proc_file < 0) {
+        perror("Failed to open proc file");
+        return NULL;
+    }
 
+    ssize_t bytes_written = write(proc_file, data, strlen(data));
+    if (bytes_written < 0) {
+        perror("Failed to write to proc file");
+    }
+
+    close(proc_file);
     /****************/ 
 
     char buffer[50]; 
@@ -97,7 +108,18 @@ void *thread2(void *arg){
     
     /*YOUR CODE HERE*/
     /* Hint: Write data into proc file.*/
+    int proc_file = open("/proc/Mythread_info", O_WRONLY);
+    if (proc_file < 0) {
+        perror("Failed to open proc file");
+        return NULL;
+    }
 
+    ssize_t bytes_written = write(proc_file, data, strlen(data));
+    if (bytes_written < 0) {
+        perror("Failed to write to proc file");
+    }
+
+    close(proc_file);
     /****************/   
 
     char buffer[50]; 

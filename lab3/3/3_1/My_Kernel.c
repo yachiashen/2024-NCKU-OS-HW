@@ -17,7 +17,45 @@ static ssize_t Mywrite(struct file *fileptr, const char __user *ubuf, size_t buf
 
 static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len, loff_t *offset){
     /*Your code here*/
+    struct task_struct *thread;
+    int buf_len = 0;
+    ssize_t ret;
 
+    if (*offset > 0) {
+        return 0;
+    }
+
+    memset(buf, 0, BUFSIZE);
+    
+    for_each_thread(current, thread) {
+        if (thread->pid == current->pid) {
+            continue;
+        }
+        
+        if (buf_len + 100 >= BUFSIZE) {
+            break;
+        }
+        
+        buf_len += snprintf(buf + buf_len, BUFSIZE - buf_len,
+            "PID: %d, "
+            "TID: %d, "
+            "Priority: %d, "
+            "State: %ld\n",
+            current->pid,
+            thread->pid, 
+            thread->prio, 
+            thread->__state);
+    }
+
+    ret = min(buffer_len, (size_t)buf_len);
+    
+    if (copy_to_user(ubuf, buf, ret)) {
+        return -EFAULT;
+    }
+    
+    *offset += ret;
+    
+    return ret;
     /****************/
 }
 
