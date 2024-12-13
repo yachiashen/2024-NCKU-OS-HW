@@ -67,21 +67,47 @@ static ssize_t osfs_write(struct file *filp, const char __user *buf, size_t len,
     ssize_t bytes_written;
     int ret;
 
-    // Step2: Check if a data block has been allocated; if not, allocate one
+    // Step 2: Check if a data block has been allocated; if not, allocate one
+    if (osfs_inode->i_blocks == 0) {
+        ret = osfs_alloc_data_block(sb_info, &osfs_inode->i_block);
+        if (ret) {
+            pr_err("osfs_write: Failed to allocate data block\n");
+            return ret;
+        }
+        osfs_inode->i_blocks = 1;
+    }
 
+    // Step 3: Limit the write length to fit within one data block
+    if (*ppos + len > BLOCK_SIZE) {
+        len = BLOCK_SIZE - *ppos;
+    }
 
-    // Step3: Limit the write length to fit within one data block
+    // Ensure we don't exceed the block size
+    if (len <= 0) {
+        pr_err("osfs_write: No space left to write\n");
+        return 0;
+    }
 
+    // Step 4: Write data from user space to the data block
+    data_block = sb_info->data_blocks + osfs_inode->i_block * BLOCK_SIZE + *ppos;
+    if (copy_from_user(data_block, buf, len)) {
+        pr_err("osfs_write: Failed to copy data from user space\n");
+        return -EFAULT;
+    }
 
-    // Step4: Write data from user space to the data block
+    // Step 5: Update inode & osfs_inode attribute
+    *ppos += len;
+    bytes_written = len;
 
+    if (*ppos > osfs_inode->i_size) {
+        osfs_inode->i_size = *ppos;
+        inode->i_size = osfs_inode->i_size;
+    }
 
-    // Step5: Update inode & osfs_inode attribute
+    inode->__i_mtime = inode->__i_ctime = current_time(inode);
 
-
-    // Step6: Return the number of bytes written
-
-    
+    // Step 6: Return the number of bytes written
+    pr_info("osfs_write: Written %ld bytes to inode %lu\n", bytes_written, inode->i_ino);
     return bytes_written;
 }
 

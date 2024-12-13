@@ -123,6 +123,7 @@ int osfs_fill_super(struct super_block *sb, void *data, int silent)
         vfree(memory_region);
         return -ENOMEM;
     }
-    pr_info("osfs: Superblock filled successfully \n");
+    //pr_info("osfs: Superblock filled successfully \n");
+    pr_info("osfs: Superblock filled successfully with root inode %lu\n", root_inode->i_ino);
     return 0;
 }
